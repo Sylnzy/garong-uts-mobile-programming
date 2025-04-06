@@ -158,7 +158,10 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 20.0),
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 40),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(30),
