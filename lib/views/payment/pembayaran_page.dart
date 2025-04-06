@@ -25,8 +25,8 @@ class HalamanPembayaran extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Total yang harus dibayar:',
-              style: TextStyle(fontSize: 16),
+              'Total yang harus dibayar:', 
+              style: TextStyle(fontSize: 16)
             ),
             const SizedBox(height: 8),
             Text(
@@ -37,23 +37,20 @@ class HalamanPembayaran extends StatelessWidget {
 
             const Text('Scan QRIS untuk melakukan pembayaran:'),
             const SizedBox(height: 10),
-            Image.asset(
-              'assets/images/splash.png',
-              height: 200,
-            ), // Ganti dengan real QRIS
+            Image.asset('assets/images/splash.png', height: 200), // Ganti dengan real QRIS
 
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Pembayaran berhasil. Terima kasih!'),
-                  ),
+                  const SnackBar(content: Text('Pembayaran berhasil. Terima kasih!'))
                 );
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
               child: const Text('Sudah Bayar'),
-            ),
+            )
           ],
         ),
       ),

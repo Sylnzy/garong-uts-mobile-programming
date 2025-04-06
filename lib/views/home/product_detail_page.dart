@@ -77,12 +77,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
               ),
               onPressed: () {
-                Provider.of<CartProvider>(context, listen: false).addItem(
-                  product.id,
-                  product.name,
-                  product.price.toInt(),
-                  quantity,
-                );
+                Provider.of<CartProvider>(
+                  context,
+                  listen: false,
+                ).addItem(product.id, product.name, product.price.toInt());
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
