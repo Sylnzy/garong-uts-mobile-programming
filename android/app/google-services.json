@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178253537919",
+    "project_id": "garong-app",
+    "storage_bucket": "garong-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178253537919:android:a543cead5c46c1a43ad54a",
+        "android_client_info": {
+          "package_name": "com.example.uts_garong_test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASQ8CPGoVN7GAf0ia0OQA6FTX108Dh5Cw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

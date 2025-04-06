@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"garong-app","appId":"1:178253537919:android:a543cead5c46c1a43ad54a","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"garong-app","configurations":{"android":"1:178253537919:android:a543cead5c46c1a43ad54a","ios":"1:178253537919:ios:5de30d1dc262f2b63ad54a"}}}}}}
