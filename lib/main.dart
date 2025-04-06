@@ -6,6 +6,8 @@ import 'views/splash/splash_screen.dart';
 import 'views/cart/cart_page.dart';
 import 'views/home/home_page.dart';
 import 'views/profile/profile_page.dart'; 
+// import 'views/payment/payment_page.dart';
+// import 'views/payment/payment_success_page.dart';
 
 import 'firebase_options.dart'; // jika pakai FlutterFire CLI
 
@@ -36,6 +38,8 @@ class MyApp extends StatelessWidget {
       routes: {
       '/home': (context) => const HomePage(),       // misalnya homepage kamu
       '/cart': (context) => const CartPage(),   // halaman keranjang
+      // '/payment': (context) => const PaymentPage(),
+      // '/payment-success': (context) => const PaymentSuccessPage(),
       // '/profile': (context) => const ProfilePage(), // kalau ada halaman profil
       },
     );
