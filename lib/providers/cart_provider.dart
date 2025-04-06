@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '/data/models/coupon.dart';
+
 
 class CartItem {
   final String id;
@@ -86,4 +88,35 @@ class CartProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Coupon? _appliedCoupon;
+
+  Coupon? get appliedCoupon => _appliedCoupon;
+
+  void applyCoupon(String code) {
+    final coupon = availableCoupons.firstWhere(
+      (c) => c.code == code,
+      orElse: () => Coupon(code: '', discount: 0.0),
+    );
+
+    if (coupon.code.isNotEmpty) {
+      _appliedCoupon = coupon;
+    } else {
+      _appliedCoupon = null;
+    }
+    notifyListeners();
+  }
+
+  double get discountAmount {
+    if (_appliedCoupon != null) {
+      return (totalAmount * _appliedCoupon!.discount) / 100;
+    }
+    return 0.0;
+  }
+
+  double get finalTotal {
+    return totalAmount + _deliveryFee - discountAmount;
+  }
+
+  final double _deliveryFee = 50.0; // Define a default delivery fee
 }

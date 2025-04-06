@@ -153,38 +153,56 @@ class HomePage extends StatelessWidget {
 
           // Navbar ngambang
           Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 40),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    Icon(Icons.menu),
-                    Icon(Icons.home),
-                    Icon(Icons.shopping_cart),
-                    Icon(Icons.person),
-                  ],
-                ),
-              ),
-            ),
+  alignment: Alignment.bottomCenter,
+  child: Padding(
+    padding: const EdgeInsets.only(bottom: 20.0),
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              // Aksi menu, misalnya buka drawer atau popup
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.pushNamed(context, '/'); // ganti sesuai route Home
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.pushNamed(context, '/cart'); // route CartPage
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile'); // ganti sesuai kebutuhan
+            },
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+
         ],
       ),
     );
