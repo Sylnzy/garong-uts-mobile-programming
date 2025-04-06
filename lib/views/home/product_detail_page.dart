@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:uts_garong_test/providers/cart_provider.dart';
 import '/data/models/product_model.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final ProductModel product;
@@ -32,19 +34,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final product = widget.product;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(product.name),
-        backgroundColor: Colors.orange,
-      ),
+      appBar: AppBar(title: Text(product.name), backgroundColor: Colors.orange),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Image.network(product.imageUrl, height: 200),
             const SizedBox(height: 16),
-            Text(product.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              product.name,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text("Rp ${product.price.toStringAsFixed(0)}", style: TextStyle(fontSize: 20, color: Colors.orange)),
+            Text(
+              "Rp ${product.price.toStringAsFixed(0)}",
+              style: TextStyle(fontSize: 20, color: Colors.orange),
+            ),
             const SizedBox(height: 16),
             Text(product.description),
             const SizedBox(height: 20),
@@ -58,10 +63,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   onPressed: decreaseQuantity,
                 ),
                 Text('$quantity', style: TextStyle(fontSize: 18)),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: increaseQuantity,
-                ),
+                IconButton(icon: Icon(Icons.add), onPressed: increaseQuantity),
               ],
             ),
 
@@ -69,14 +71,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
               ),
               onPressed: () {
-                // nanti kita sambung ke keranjang
+                Provider.of<CartProvider>(context, listen: false).addItem(
+                  product.id,
+                  product.name,
+                  product.price.toInt(),
+                  quantity,
+                );
+
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Ditambahkan ${product.name} x$quantity ke keranjang")),
+                  SnackBar(
+                    content: Text(
+                      "Ditambahkan ${product.name} x$quantity ke keranjang",
+                    ),
+                  ),
                 );
               },
+
               icon: Icon(Icons.add_shopping_cart),
               label: Text("Tambahkan ke Keranjang"),
             ),

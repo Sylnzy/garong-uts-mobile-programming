@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
+import 'package:provider/provider.dart';
+import 'providers/cart_provider.dart';
 import 'views/splash/splash_screen.dart';
 import 'firebase_options.dart'; // jika pakai FlutterFire CLI
 
@@ -9,7 +10,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform, // pastikan ini sesuai
   );
-  runApp(const MyApp());
+  runApp( MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
+      child: MyApp(),
+    ),);
 }
 
 class MyApp extends StatelessWidget {
