@@ -7,6 +7,7 @@ import 'views/cart/cart_page.dart';
 import 'views/home/home_page.dart';
 import 'views/profile/profile_page.dart';
 import 'views/auth/login_page.dart';
+import 'views/profile/edit_profile_page.dart';
 
 // import 'views/payment/payment_page.dart';
 // import 'views/payment/payment_success_page.dart';
@@ -41,6 +42,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(), // Home as root route
         '/login': (context) => LoginPage(),
         '/cart': (context) => const CartPage(),
+        '/profile': (context) => const ProfilePage(),
+        '/edit-profile': (context) => const EditProfilePage(),
         // ...other routes...
       },
     );
