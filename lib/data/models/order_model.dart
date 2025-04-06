@@ -17,7 +17,7 @@ class Order {
     required this.paymentInfo,
   });
 
-  int get subtotal => items.fold(0, (sum, item) => sum + item.totalPrice);
+  int get subtotal => items.fold(0, (sum, item) => sum + item.totalPrice.toInt());
   int get total => subtotal + deliveryInfo.fee - paymentInfo.discount;
 }
 
