@@ -17,13 +17,13 @@
 ---
 
 ## 🔨 Fitur yang Sedang Dikerjakan
-- [ x] **Cart Page Finalisasi**
-  - [x ] Integrasi dari detail produk ke keranjang
-  - [ x] Logika kupon diskon:
+- [x] **Cart Page Finalisasi**
+  - [x] Integrasi dari detail produk ke keranjang
+  - [x] Logika kupon diskon:
     - `maul` → diskon 5%
     - `naila` → diskon 2%
     - `amel` → diskon 10%
-  - [ x] Perhitungan:
+  - [x] Perhitungan:
     - Subtotal
     - Ongkir
     - Diskon
