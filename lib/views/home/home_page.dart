@@ -4,17 +4,83 @@ import '/data/models/product_model.dart';
 import '/views/widgets/product_card.dart';
 import '/views/widgets/category_item.dart';
 import '/views/home/product_detail_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '/views/widgets/custom_navbar.dart';
+import '/views/widgets/custom_drawer.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _selectedIndex = 0;
+
+  final List<String> _drawerItems = [
+    'Home',
+    'Pesanan',
+    'Order History',
+    'Lokasi',
+    'About',
+    'Setting',
+    'Logout',
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    Navigator.pop(context);
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/cart');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/history');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/lokasi');
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, '/about');
+        break;
+      case 5:
+        Navigator.pushReplacementNamed(context, '/setting');
+        break;
+    }
+  }
+
+  void _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Logout failed: ${e.toString()}')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(_drawerItems[_selectedIndex]),
+        backgroundColor: Colors.orange,
+        automaticallyImplyLeading: false,
+      ),
+      drawer: CustomDrawer(currentRoute: '/', onLogout: _logout),
       body: Stack(
         children: [
-          // Konten utama
           SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 100),
             child: Column(
@@ -22,8 +88,6 @@ class HomePage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 60),
-
-                // Search bar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
@@ -43,10 +107,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // Promo carousel placeholder
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
@@ -59,10 +120,7 @@ class HomePage extends StatelessWidget {
                     child: const Text('Promo Carousel'),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // Kategori section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -74,8 +132,6 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-
-                // Kategori grid
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: GridView.count(
@@ -109,16 +165,12 @@ class HomePage extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // Produk section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text('Rekomendasi', style: AppTextStyle.heading),
                 ),
                 const SizedBox(height: 10),
-
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -145,66 +197,34 @@ class HomePage extends StatelessWidget {
                     );
                   },
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),
           ),
-
-          // Navbar ngambang
-          Align(
-  alignment: Alignment.bottomCenter,
-  child: Padding(
-    padding: const EdgeInsets.only(bottom: 20.0),
-    child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 40),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              // Aksi menu, misalnya buka drawer atau popup
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () {
-              Navigator.pushNamed(context, '/'); // ganti sesuai route Home
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              Navigator.pushNamed(context, '/cart'); // route CartPage
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile'); // ganti sesuai kebutuhan
-            },
-          ),
-        ],
-      ),
-    ),
-  ),
-),
-
+          CustomNavBar(scaffoldKey: _scaffoldKey, currentRoute: '/'),
         ],
       ),
     );
+  }
+
+  IconData _getIconForIndex(int index) {
+    switch (index) {
+      case 0:
+        return Icons.home;
+      case 1:
+        return Icons.shopping_cart;
+      case 2:
+        return Icons.history;
+      case 3:
+        return Icons.location_on;
+      case 4:
+        return Icons.info;
+      case 5:
+        return Icons.settings;
+      case 6:
+        return Icons.logout;
+      default:
+        return Icons.circle;
+    }
   }
 }

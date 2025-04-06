@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '/providers/cart_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:uts_garong_test/views/payment/data_pembeli_page.dart';
+import '/views/widgets/custom_navbar.dart';
+import '/views/widgets/custom_drawer.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
@@ -21,6 +23,12 @@ class _CartPageState extends State<CartPage> {
     symbol: 'Rp ',
     decimalDigits: 0,
   );
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _logout() {
+    // Add your logout logic here
+    Navigator.of(context).pushReplacementNamed('/login');
+  }
 
   void applyCoupon(String code) {
     Map<String, double> coupons = {'maul': 0.05, 'naila': 0.02, 'amel': 0.10};
@@ -52,158 +60,178 @@ class _CartPageState extends State<CartPage> {
     final total = subtotal - discountAmount + deliveryFee;
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Pesanan'),
         centerTitle: true,
         backgroundColor: Colors.orange,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Add delivery selection before the cart items
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Metode Pengambilan:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: RadioListTile<bool>(
-                            title: const Text('Delivery'),
-                            value: true,
-                            groupValue: isDelivery,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isDelivery = value!;
-                              });
-                            },
+      drawer: CustomDrawer(currentRoute: '/cart', onLogout: _logout),
+      body: Column(
+        // Changed Stack to Column
+        children: [
+          Expanded(
+            // Wrap main content in Expanded
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Add delivery selection before the cart items
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Metode Pengambilan:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        Expanded(
-                          child: RadioListTile<bool>(
-                            title: const Text('Self Pickup'),
-                            value: false,
-                            groupValue: isDelivery,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isDelivery = value!;
-                              });
-                            },
+                          Row(
+                            children: [
+                              Expanded(
+                                child: RadioListTile<bool>(
+                                  title: const Text('Delivery'),
+                                  value: true,
+                                  groupValue: isDelivery,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      isDelivery = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                              Expanded(
+                                child: RadioListTile<bool>(
+                                  title: const Text('Self Pickup'),
+                                  value: false,
+                                  groupValue: isDelivery,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      isDelivery = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Daftar produk
-            Expanded(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (ctx, i) {
-                  final item = items[i];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      leading: Image.network(
-                        'https://via.placeholder.com/100', // ganti sesuai kebutuhan
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
+                        ],
                       ),
-                      title: Text(item.title),
-                      subtitle: Text('Jumlah: ${item.quantity}'),
-                      trailing: Text('Rp ${item.price * item.quantity}'),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Kupon
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _couponController,
-                    decoration: const InputDecoration(
-                      hintText: 'Masukkan kode kupon',
-                      border: OutlineInputBorder(),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () => applyCoupon(_couponController.text),
-                  child: const Text("Gunakan"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Ringkasan harga
-            Column(
-              children: [
-                summaryRow("Subtotal", subtotal),
-                summaryRow("Pengantaran", deliveryFee),
-                if (_discount > 0)
-                  summaryRow(
-                    "Diskon (${(_discount * 100).toInt()}%)",
-                    -discountAmount,
-                  ),
-                const Divider(),
-                summaryRow("Total", total, isBold: true),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Tombol Pesan
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => DataPembeliPage(
-                            totalPayment: total,
-                            items: cart.items.values.toList(),
-                            isDelivery: isDelivery, // Add this parameter
+                  // Daftar produk
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (ctx, i) {
+                        final item = items[i];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: Image.network(
+                              'https://via.placeholder.com/100', // ganti sesuai kebutuhan
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
+                            title: Text(item.title),
+                            subtitle: Text('Jumlah: ${item.quantity}'),
+                            trailing: Text('Rp ${item.price * item.quantity}'),
                           ),
+                        );
+                      },
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 16,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+
+                  // Kupon
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _couponController,
+                          decoration: const InputDecoration(
+                            hintText: 'Masukkan kode kupon',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () => applyCoupon(_couponController.text),
+                        child: const Text("Gunakan"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                child: const Text(
-                  "Bayar Sekarang",
-                  style: TextStyle(fontSize: 18),
-                ),
+                  const SizedBox(height: 16),
+
+                  // Ringkasan harga
+                  Column(
+                    children: [
+                      summaryRow("Subtotal", subtotal),
+                      summaryRow("Pengantaran", deliveryFee),
+                      if (_discount > 0)
+                        summaryRow(
+                          "Diskon (${(_discount * 100).toInt()}%)",
+                          -discountAmount,
+                        ),
+                      const Divider(),
+                      summaryRow("Total", total, isBold: true),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Tombol Pesan
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 80,
+                    ), // Add padding for navbar
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => DataPembeliPage(
+                                    totalPayment: total,
+                                    items: cart.items.values.toList(),
+                                    isDelivery:
+                                        isDelivery, // Add this parameter
+                                  ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          "Bayar Sekarang",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          CustomNavBar(
+            scaffoldKey: _scaffoldKey,
+            currentRoute: '/cart',
+          ), // Place navbar at bottom
+        ],
       ),
     );
   }

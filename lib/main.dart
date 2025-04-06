@@ -5,7 +5,9 @@ import 'providers/cart_provider.dart';
 import 'views/splash/splash_screen.dart';
 import 'views/cart/cart_page.dart';
 import 'views/home/home_page.dart';
-import 'views/profile/profile_page.dart'; 
+import 'views/profile/profile_page.dart';
+import 'views/auth/login_page.dart';
+
 // import 'views/payment/payment_page.dart';
 // import 'views/payment/payment_success_page.dart';
 
@@ -16,12 +18,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform, // pastikan ini sesuai
   );
-  runApp( MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-      ],
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => CartProvider())],
       child: MyApp(),
-    ),);
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -33,14 +35,13 @@ class MyApp extends StatelessWidget {
       title: 'Garong App',
       theme: ThemeData(primarySwatch: Colors.green),
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
-      initialRoute: '/',
+      initialRoute: '/splash', // Changed this
       routes: {
-      '/home': (context) => const HomePage(),       // misalnya homepage kamu
-      '/cart': (context) => const CartPage(),   // halaman keranjang
-      // '/payment': (context) => const PaymentPage(),
-      // '/payment-success': (context) => const PaymentSuccessPage(),
-      // '/profile': (context) => const ProfilePage(), // kalau ada halaman profil
+        '/splash': (context) => const SplashScreen(),
+        '/': (context) => const HomePage(), // Home as root route
+        '/login': (context) => LoginPage(),
+        '/cart': (context) => const CartPage(),
+        // ...other routes...
       },
     );
   }
