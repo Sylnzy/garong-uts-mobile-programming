@@ -4,7 +4,6 @@ import '/providers/cart_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:uts_garong_test/views/payment/data_pembeli_page.dart';
 
-
 class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
 
@@ -16,7 +15,12 @@ class _CartPageState extends State<CartPage> {
   final TextEditingController _couponController = TextEditingController();
   double _discount = 0.0;
   String _usedCoupon = '';
-  final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  bool isDelivery = true; // Add this line for delivery selection state
+  final currencyFormatter = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
 
   void applyCoupon(String code) {
     Map<String, double> coupons = {'maul': 0.05, 'naila': 0.02, 'amel': 0.10};
@@ -41,10 +45,11 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
     final items = cart.items.values.toList();
-    final deliveryFee = 10000;
+    final deliveryFee =
+        isDelivery ? 10000 : 0; // Modify delivery fee based on selection
     final subtotal = cart.totalAmount;
     final discountAmount = (subtotal * _discount).toInt();
-    final total = subtotal + deliveryFee - discountAmount;
+    final total = subtotal - discountAmount + deliveryFee;
 
     return Scaffold(
       appBar: AppBar(
@@ -56,6 +61,49 @@ class _CartPageState extends State<CartPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // Add delivery selection before the cart items
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Metode Pengambilan:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: RadioListTile<bool>(
+                            title: const Text('Delivery'),
+                            value: true,
+                            groupValue: isDelivery,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isDelivery = value!;
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: RadioListTile<bool>(
+                            title: const Text('Self Pickup'),
+                            value: false,
+                            groupValue: isDelivery,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isDelivery = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // Daftar produk
             Expanded(
               child: ListView.builder(
@@ -127,9 +175,16 @@ class _CartPageState extends State<CartPage> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DataPembeliPage()),
-                  );  
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => DataPembeliPage(
+                            totalPayment: total,
+                            items: cart.items.values.toList(),
+                            isDelivery: isDelivery, // Add this parameter
+                          ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,

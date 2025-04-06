@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'pembayaran_page.dart';
+import '/providers/cart_provider.dart';
 
 class DataPembeliPage extends StatefulWidget {
+  final int totalPayment;
+  final List<CartItem> items;
+  final bool isDelivery;
+
+  const DataPembeliPage({
+    Key? key,
+    required this.totalPayment,
+    required this.items,
+    required this.isDelivery,
+  }) : super(key: key);
+
   @override
-  _DataPembeliPageState createState() => _DataPembeliPageState();
+  State<DataPembeliPage> createState() => _DataPembeliPageState();
 }
 
 class _DataPembeliPageState extends State<DataPembeliPage> {
@@ -14,25 +26,25 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
   final alamatController = TextEditingController();
   final catatanController = TextEditingController();
 
-  String metodePengiriman = 'Delivery';
-  int biayaPengiriman = 10000;
-
   void _handlePesan() {
     if (_formKey.currentState!.validate()) {
       final buyerData = {
         'nama': namaController.text,
         'email': emailController.text,
         'hp': hpController.text,
-        'alamat': alamatController.text,
+        'alamat': widget.isDelivery ? alamatController.text : '',
         'catatan': catatanController.text,
-        'pengiriman': metodePengiriman,
-        'biayaPengiriman': biayaPengiriman,
+        'isDelivery': widget.isDelivery,
       };
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => HalamanPembayaran(buyerData: buyerData),
+          builder:
+              (context) => HalamanPembayaran(
+                buyerData: buyerData,
+                totalPayment: widget.totalPayment,
+              ),
         ),
       );
     }
@@ -41,40 +53,50 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Data Pembeli")),
+      appBar: AppBar(
+        title: const Text("Data Pembeli"),
+        backgroundColor: Colors.orange,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(controller: namaController, decoration: InputDecoration(labelText: 'Nama'), validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
-              TextFormField(controller: emailController, decoration: InputDecoration(labelText: 'Email'), validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
-              TextFormField(controller: hpController, decoration: InputDecoration(labelText: 'No. HP'), validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
-              TextFormField(controller: alamatController, decoration: InputDecoration(labelText: 'Alamat'), maxLines: 3, validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
-
-              SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: metodePengiriman,
-                items: ['Delivery', 'Self Pickup'].map((metode) {
-                  return DropdownMenuItem(value: metode, child: Text(metode));
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    metodePengiriman = value!;
-                    biayaPengiriman = metodePengiriman == 'Delivery' ? 10000 : 0;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Metode Pengiriman'),
+              TextFormField(
+                controller: namaController,
+                decoration: const InputDecoration(labelText: 'Nama'),
+                validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
               ),
-
-              TextFormField(controller: catatanController, decoration: InputDecoration(labelText: 'Catatan'), maxLines: 2),
-
-              SizedBox(height: 20),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+              ),
+              TextFormField(
+                controller: hpController,
+                decoration: const InputDecoration(labelText: 'No. HP'),
+                validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+              ),
+              if (widget
+                  .isDelivery) // Only show address field if delivery is selected
+                TextFormField(
+                  controller: alamatController,
+                  decoration: const InputDecoration(labelText: 'Alamat'),
+                  maxLines: 3,
+                  validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+                ),
+              TextFormField(
+                controller: catatanController,
+                decoration: const InputDecoration(labelText: 'Catatan'),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _handlePesan,
-                child: Text('Pesan'),
-              )
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                child: const Text('Pesan'),
+              ),
             ],
           ),
         ),
