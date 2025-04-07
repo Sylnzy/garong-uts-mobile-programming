@@ -1,6 +1,7 @@
 // lib/data/models/product_model.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 class ProductModel {
   final String id;
@@ -50,7 +51,10 @@ class ProductModel {
       name: data['name'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       description: data['description'] ?? '',
-      price: (data['price'] ?? 0).toDouble(),
+      price:
+          (data['price'] is int)
+              ? (data['price'] as int).toDouble()
+              : (data['price'] ?? 0.0),
       stock: data['stock'] ?? 0,
       category: data['category'] ?? '',
     );
@@ -86,6 +90,16 @@ class ProductModel {
     }
 
     await ref.update({'stock': currentStock - quantity});
+  }
+
+  // Add formatted price getter
+  String get formattedPrice {
+    final format = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return format.format(price);
   }
 }
 

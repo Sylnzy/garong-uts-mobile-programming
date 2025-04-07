@@ -40,11 +40,11 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder:
-              (context) => HalamanPembayaran(
-                buyerData: buyerData,
-                totalPayment: widget.totalPayment,
-              ),
+          builder: (context) => HalamanPembayaran(
+            buyerData: buyerData,
+            totalPayment: widget.totalPayment,
+            items: widget.items, // Added the missing required parameter
+          ),
         ),
       );
     }
@@ -78,8 +78,7 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
                 decoration: const InputDecoration(labelText: 'No. HP'),
                 validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
               ),
-              if (widget
-                  .isDelivery) // Only show address field if delivery is selected
+              if (widget.isDelivery)
                 TextFormField(
                   controller: alamatController,
                   decoration: const InputDecoration(labelText: 'Alamat'),

@@ -16,13 +16,13 @@ class CustomDrawer extends StatelessWidget {
       child: Column(
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.orange),
+            decoration: const BoxDecoration(color: const Color(0xFF0D1B2A)),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 35, color: Colors.orange),
+                  child: Icon(Icons.person, size: 35, color: const Color(0xFF0D1B2A)),
                 ),
                 const SizedBox(width: 10),
                 const Text(
@@ -98,11 +98,11 @@ class CustomDrawer extends StatelessWidget {
   }) {
     final bool isSelected = currentRoute == route;
     return ListTile(
-      leading: Icon(icon, color: isSelected ? Colors.orange : null),
+      leading: Icon(icon, color: isSelected ? const Color(0xFF0D1B2A) : null),
       title: Text(
         title,
         style: TextStyle(
-          color: isSelected ? Colors.orange : null,
+          color: isSelected ? const Color(0xFF0D1B2A) : null,
           fontWeight: isSelected ? FontWeight.bold : null,
         ),
       ),

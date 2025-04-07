@@ -1,21 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart'; // Added this import for debugPrint
 import '../../data/models/product_model.dart';
 import '/data/models/order_model.dart' as app_models;
 import '../../data/models/user_model.dart';
 
 class FirebaseService {
   static FirebaseService? _instance;
-  static late final FirebaseFirestore _firestore;
-  static late final FirebaseAuth _auth;
-  static late final DatabaseReference _database;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseAuth _auth;
+  late final DatabaseReference _database;
 
   // Private constructor
   FirebaseService._() {
+    // Initialize instances without re-initializing Firebase
     _firestore = FirebaseFirestore.instance;
     _auth = FirebaseAuth.instance;
     _database = FirebaseDatabase.instance.ref();
+
+    // Ensure the database URL is set correctly
+    if (FirebaseDatabase.instance.databaseURL !=
+        'https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app') {
+      debugPrint('Warning: Database URL mismatch, resetting to correct URL');
+      FirebaseDatabase.instance.databaseURL =
+          'https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app';
+    }
   }
 
   // Singleton instance
@@ -24,16 +34,8 @@ class FirebaseService {
     return _instance!;
   }
 
-  // Initialize Firebase
-  static Future<void> initialize() async {
-    if (_instance == null) {
-      _instance = FirebaseService._();
-      FirebaseDatabase.instance.setPersistenceEnabled(true);
-    }
-  }
-
   // Products
-  static Future<List<ProductModel>> getProducts() async {
+  Future<List<ProductModel>> getProducts() async {
     final snapshot = await _firestore.collection('products').get();
     return snapshot.docs
         .map((doc) => ProductModel.fromFirestore(doc.data(), doc.id))
@@ -41,7 +43,7 @@ class FirebaseService {
   }
 
   // Products - Realtime Database
-  static Stream<List<ProductModel>> getProductsStream() {
+  Stream<List<ProductModel>> getProductsStream() {
     print('Initializing products stream...'); // Debug print
     return _database.child('products').onValue.map((event) {
       print(
@@ -74,22 +76,22 @@ class FirebaseService {
     });
   }
 
-  static Future<void> addProduct(ProductModel product) async {
+  Future<void> addProduct(ProductModel product) async {
     await _database.child('products').push().set(product.toRTDB());
   }
 
-  static Future<void> updateProduct(ProductModel product) async {
+  Future<void> updateProduct(ProductModel product) async {
     await _database
         .child('products')
         .child(product.id)
         .update(product.toRTDB());
   }
 
-  static Future<void> deleteProduct(String productId) async {
+  Future<void> deleteProduct(String productId) async {
     await _database.child('products').child(productId).remove();
   }
 
-  static Future<void> updateProductStock(String productId, int newStock) async {
+  Future<void> updateProductStock(String productId, int newStock) async {
     try {
       await FirebaseFirestore.instance
           .collection('products')
@@ -101,7 +103,7 @@ class FirebaseService {
     }
   }
 
-  static Future<void> decreaseStock(String productId, int quantity) async {
+  Future<void> decreaseStock(String productId, int quantity) async {
     final ref = _database.child('products').child(productId);
     final snapshot = await ref.get();
 
@@ -119,7 +121,7 @@ class FirebaseService {
   }
 
   // Orders
-  static Future<void> createOrder(app_models.Order order) async {
+  Future<void> createOrder(app_models.Order order) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
@@ -167,16 +169,85 @@ class FirebaseService {
   }
 
   // User Profile
-  static Future<void> updateUserProfile(UserModel user) async {
+  Future<void> updateUserProfile(UserModel user) async {
     await _firestore
         .collection('users')
         .doc(user.id)
         .set(user.toFirestore(), SetOptions(merge: true));
   }
 
-  static Future<UserModel?> getUserProfile(String userId) async {
+  Future<UserModel?> getUserProfile(String userId) async {
     final doc = await _firestore.collection('users').doc(userId).get();
     if (!doc.exists) return null;
     return UserModel.fromFirestore(doc.data()!, doc.id);
+  }
+
+  /// Checks if the app is connected to Firebase Realtime Database
+  Future<bool> checkDatabaseConnection() async {
+    try {
+      // Try to ping the database
+      final connectionRef = FirebaseDatabase.instance.ref(".info/connected");
+      final event = await connectionRef.once();
+
+      // Log connection status
+      final isConnected = event.snapshot.value as bool? ?? false;
+      debugPrint(
+        '📡 Firebase Realtime Database connection: ${isConnected ? "✅ CONNECTED" : "❌ DISCONNECTED"}',
+      );
+
+      // Additional verification by trying to read from the database
+      final dbTest =
+          await FirebaseDatabase.instance
+              .ref()
+              .child("products")
+              .limitToFirst(1)
+              .get();
+      debugPrint(
+        '🔍 Database test result: ${dbTest.exists ? "✅ Data exists" : "⚠️ No data"}',
+      );
+
+      if (dbTest.exists) {
+        debugPrint('📦 Sample data: ${dbTest.children.first.key}');
+      }
+
+      // Print the database URL for verification
+      debugPrint('🌐 Database URL: ${FirebaseDatabase.instance.databaseURL}');
+
+      return isConnected && dbTest.exists;
+    } catch (e) {
+      debugPrint('❌ Database connection error: $e');
+      return false;
+    }
+  }
+
+  /// Try different database URLs to find one that works
+  Future<String?> findWorkingDatabaseURL() async {
+    final possibleURLs = [
+      'https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app',
+      'https://garong-app.firebasedatabase.app',
+      'https://garong-app-default-rtdb.firebasedatabase.app',
+    ];
+
+    for (final url in possibleURLs) {
+      try {
+        debugPrint('Trying database URL: $url');
+        FirebaseDatabase.instance.databaseURL = url;
+
+        // Try to access the database
+        final ref = FirebaseDatabase.instance.ref(".info/connected");
+        final event = await ref.once();
+        final isConnected = event.snapshot.value as bool? ?? false;
+
+        if (isConnected) {
+          debugPrint('✅ Working database URL found: $url');
+          return url;
+        }
+      } catch (e) {
+        debugPrint('Error with URL $url: $e');
+      }
+    }
+
+    debugPrint('❌ No working database URL found');
+    return null;
   }
 }

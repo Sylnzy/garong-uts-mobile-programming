@@ -13,45 +13,60 @@ import 'views/pages/order_history_page.dart';
 import 'views/pages/lokasi_page.dart';
 import 'views/pages/about_page.dart';
 import 'views/pages/setting_page.dart';
-import 'utils/firebase_seeder.dart';
+import 'firebase_options.dart';
+// import 'core/services/firebase_seeder.dart';
 
-import 'firebase_options.dart'; // jika pakai FlutterFire CLI
-import 'core/services/firebase_service.dart';
-
-Future<void> initializeFirebase() async {
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-
-    // Configure Realtime Database
-    FirebaseDatabase.instance.databaseURL =
-        'https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app';
-  }
-}
-
-void main() async {
+Future<void> setupFirebase() async {
   try {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    // Initialize Firebase only if not already initialized
+    // Initialize Firebase if not already initialized
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-
-      // Initialize FirebaseService after Firebase is initialized
-      await FirebaseService.initialize();
     }
+    
+    // Force set the database URL regardless of what's in firebase_options.dart
+    FirebaseDatabase.instance.databaseURL = 'https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app';
+    
+    // Debug info
+    debugPrint('Firebase Apps Count: ${Firebase.apps.length}');
+    debugPrint('Database URL: ${FirebaseDatabase.instance.databaseURL}');
+    debugPrint('Project ID: ${Firebase.apps.first.options.projectId}');
+    
+    // Test database connection
+    final connectionRef = FirebaseDatabase.instance.ref(".info/connected");
+    final event = await connectionRef.once();
+    final isConnected = event.snapshot.value as bool? ?? false;
+    debugPrint('Connected to Realtime Database: $isConnected');
+    
+    return;
+  } catch (e, stack) {
+    debugPrint('Firebase setup error: $e');
+    debugPrint('Stack trace: $stack');
+    rethrow;
+  }
+}
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    // Set up Firebase with correct configuration
+    await setupFirebase();
+    
+    // Continue with your app
     runApp(
       MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => CartProvider())],
+        providers: [
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+        ],
         child: const MyApp(),
       ),
     );
   } catch (e) {
-    debugPrint('Error initializing app: $e');
+    debugPrint('Error in main: $e');
+    // Still run the app even if Firebase setup fails
+    runApp(const MyApp());
   }
 }
 
@@ -64,10 +79,10 @@ class MyApp extends StatelessWidget {
       title: 'Garong App',
       theme: ThemeData(primarySwatch: Colors.green),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash', // Changed this
+      initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
-        '/': (context) => const HomePage(), // Home as root route
+        '/': (context) => const HomePage(),
         '/login': (context) => LoginPage(),
         '/cart': (context) => const CartPage(),
         '/profile': (context) => const ProfilePage(),
@@ -76,7 +91,6 @@ class MyApp extends StatelessWidget {
         '/lokasi': (context) => const LokasiPage(),
         '/about': (context) => const AboutPage(),
         '/setting': (context) => const SettingPage(),
-        // ...other routes...
       },
     );
   }
