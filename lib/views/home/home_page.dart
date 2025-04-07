@@ -7,6 +7,8 @@ import '/views/home/product_detail_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '/views/widgets/custom_navbar.dart';
 import '/views/widgets/custom_drawer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '/core/services/firebase_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +30,15 @@ class _HomePageState extends State<HomePage> {
     'Setting',
     'Logout',
   ];
+
+  late Stream<List<ProductModel>> productsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    productsStream = FirebaseService.getProductsStream();
+    print('Stream initialized in HomePage'); // Debug print
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -171,29 +182,60 @@ class _HomePageState extends State<HomePage> {
                   child: Text('Rekomendasi', style: AppTextStyle.heading),
                 ),
                 const SizedBox(height: 10),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: dummyProducts.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.7,
-                  ),
-                  itemBuilder: (context, index) {
-                    final product = dummyProducts[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ProductDetailPage(product: product),
+                StreamBuilder<List<ProductModel>>(
+                  stream: productsStream,
+                  builder: (context, snapshot) {
+                    print(
+                      'StreamBuilder update: ${snapshot.connectionState}',
+                    ); // Debug print
+
+                    if (snapshot.hasError) {
+                      print(
+                        'StreamBuilder error: ${snapshot.error}',
+                      ); // Debug print
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final products = snapshot.data ?? [];
+                    print(
+                      'Received ${products.length} products',
+                    ); // Debug print
+
+                    if (products.isEmpty) {
+                      return const Center(child: Text('No products available'));
+                    }
+
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: products.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.7,
                           ),
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => ProductDetailPage(product: product),
+                              ),
+                            );
+                          },
+                          child: ProductCard(product: product),
                         );
                       },
-                      child: ProductCard(product: product),
                     );
                   },
                 ),
