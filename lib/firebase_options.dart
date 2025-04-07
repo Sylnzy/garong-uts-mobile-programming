@@ -55,6 +55,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '178253537919',
     projectId: 'garong-app',
     storageBucket: 'garong-app.firebasestorage.app',
+    databaseURL:
+        'https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
