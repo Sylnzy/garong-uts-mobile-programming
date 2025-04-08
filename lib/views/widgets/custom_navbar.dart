@@ -41,7 +41,7 @@ class CustomNavBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.home),
-                color: currentRoute == '/' ? Colors.orange : null,
+                color: currentRoute == '/' ? const Color(0xFF0D1B2A): null,
                 onPressed: () {
                   if (currentRoute != '/') {
                     Navigator.of(
@@ -52,7 +52,7 @@ class CustomNavBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
-                color: currentRoute == '/cart' ? Colors.orange : null,
+                color: currentRoute == '/cart' ? const Color(0xFF0D1B2A) : null,
                 onPressed: () {
                   if (currentRoute != '/cart') {
                     Navigator.pushReplacementNamed(context, '/cart');
@@ -61,7 +61,7 @@ class CustomNavBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.person),
-                color: currentRoute == '/profile' ? Colors.orange : null,
+                color: currentRoute == '/profile' ? const Color(0xFF0D1B2A) : null,
                 onPressed: () {
                   if (currentRoute != '/profile') {
                     Navigator.pushReplacementNamed(context, '/profile');

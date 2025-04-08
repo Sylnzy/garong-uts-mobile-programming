@@ -127,8 +127,10 @@ class CartProvider with ChangeNotifier {
 
   Future<void> checkout() async {
     try {
+      final firebaseService = FirebaseService.instance;
+
       for (var item in _items.values) {
-        await FirebaseService.decreaseStock(item.id, item.quantity);
+        await firebaseService.decreaseStock(item.id, item.quantity);
       }
       clearCart();
     } catch (e) {

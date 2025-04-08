@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "178253537919",
+    "firebase_url": "https://garong-app-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "garong-app",
     "storage_bucket": "garong-app.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.example.uts_garong_test"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "178253537919-tg2odu8sjte7cehldah81t0d50murkl6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyASQ8CPGoVN7GAf0ia0OQA6FTX108Dh5Cw"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178253537919-tg2odu8sjte7cehldah81t0d50murkl6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "178253537919-489ml1s325i5g8i94jl57knl6a5b4i2f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.utsGarongTest"
+              }
+            }
+          ]
         }
       }
     }
