@@ -15,8 +15,8 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TextEditingController _nameController;
+  late TextEditingController _emailController; // Tambahan untuk email
   File? _imageFile;
   bool _isLoading = false;
   String? _errorMessage;
@@ -26,11 +26,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
     _nameController = TextEditingController(text: user?.displayName);
+    _emailController = TextEditingController(
+      text: user?.email,
+    ); // Email tidak bisa diubah di Firebase Auth tanpa reverifikasi
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose(); // Dispose email controller
     super.dispose();
   }
 
@@ -109,105 +113,189 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      key: _scaffoldKey,
+      backgroundColor: const Color(0xFF0F1C2E),
       appBar: AppBar(
-        title: const Text('Edit Profil'),
-        centerTitle: true,
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.white,
+        title: const Text("Profile", style: TextStyle(color: Colors.black)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              GestureDetector(
-                onTap: _pickImage,
-                child: Stack(
+
+              // Card putih
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
+                child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundImage:
-                          _imageFile != null
-                              ? FileImage(_imageFile!)
-                              : (user?.photoURL != null
-                                      ? NetworkImage(user!.photoURL!)
-                                      : null)
-                                  as ImageProvider?,
-                      child:
-                          _imageFile == null && user?.photoURL == null
-                              ? const Icon(Icons.person, size: 60)
-                              : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                    // Foto profil + edit icon
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage:
+                              _imageFile != null
+                                  ? FileImage(_imageFile!)
+                                  : (user?.photoURL != null
+                                          ? NetworkImage(user!.photoURL!)
+                                          : null)
+                                      as ImageProvider?,
+                          child:
+                              _imageFile == null && user?.photoURL == null
+                                  ? const Icon(Icons.person, size: 60)
+                                  : null,
                         ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 20,
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFF0F1C2E),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              size: 18,
+                              color: Color(0xFF0F1C2E),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Nama
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Nama",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Masukkan nama Anda',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Email (read-only)
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Email",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextField(
+                        controller: _emailController,
+                        readOnly: true, // Email tidak bisa diedit
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Email Anda',
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama tidak boleh kosong';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  icon:
-                      _isLoading
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          )
-                          : const Icon(Icons.save),
-                  label: Text(_isLoading ? 'Menyimpan...' : 'Simpan'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+
+                    const SizedBox(height: 24),
+
+                    // Tombol Simpan
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F1C2E),
+                          disabledBackgroundColor: Colors.grey,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                : const Text(
+                                  "Simpan",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],

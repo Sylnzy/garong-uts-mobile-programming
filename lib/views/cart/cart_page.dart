@@ -42,7 +42,7 @@ class _CartPageState extends State<CartPage> {
 
     try {
       final dbRef = FirebaseDatabase.instance.ref().child('products');
-      
+
       for (String productId in productIds) {
         final snapshot = await dbRef.child(productId).get();
         if (snapshot.exists) {
@@ -64,11 +64,11 @@ class _CartPageState extends State<CartPage> {
 
   void applyCoupon(String code) {
     Map<String, double> coupons = {
-      'warunghemat': 0.10, 
-      'gratong': 0.0,  // Special code for free delivery
-      'maul': 0.05, 
-      'naila': 0.02, 
-      'amel': 0.10
+      'warunghemat': 0.10,
+      'gratong': 0.0, // Special code for free delivery
+      'maul': 0.05,
+      'naila': 0.02,
+      'amel': 0.10,
     };
 
     setState(() {
@@ -99,18 +99,18 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
     final items = cart.items.values.toList();
-    
+
     // Calculate delivery fee (free if GRATONG coupon is used)
-    final deliveryFee = isDelivery 
-        ? (_usedCoupon.toLowerCase() == 'gratong' ? 0 : 20000) 
-        : 0;
-        
+    final deliveryFee =
+        isDelivery ? (_usedCoupon.toLowerCase() == 'gratong' ? 0 : 20000) : 0;
+
     final subtotal = cart.totalAmount;
     final discountAmount = (subtotal * _discount).toInt();
     final total = subtotal - discountAmount + deliveryFee;
 
     return Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomInset: false, // Add this line
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Pesanan'),
@@ -145,7 +145,10 @@ class _CartPageState extends State<CartPage> {
                           children: [
                             Expanded(
                               child: RadioListTile<bool>(
-                                title: const Text('Delivery'),
+                                title: const Text(
+                                  'Delivery',
+                                  style: TextStyle(fontSize: 15.5),
+                                ),
                                 value: true,
                                 groupValue: isDelivery,
                                 onChanged: (bool? value) {
@@ -157,7 +160,10 @@ class _CartPageState extends State<CartPage> {
                             ),
                             Expanded(
                               child: RadioListTile<bool>(
-                                title: const Text('Self Pickup'),
+                                title: const Text(
+                                  'Self Pickup',
+                                  style: TextStyle(fontSize: 15.5),
+                                ),
                                 value: false,
                                 groupValue: isDelivery,
                                 onChanged: (bool? value) {
@@ -172,104 +178,124 @@ class _CartPageState extends State<CartPage> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 10),
-                  
+
                   // Product list
                   Expanded(
-                    child: items.isEmpty 
-                      ? const Center(child: Text('Keranjang kosong'))
-                      : ListView.builder(
-                          itemCount: items.length,
-                          itemBuilder: (ctx, i) {
-                            final item = items[i];
-                            final productId = cart.items.keys.elementAt(i);
-                            final imageUrl = productImages[productId] ?? '';
-                            
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEFEFEF),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                children: [
-                                  // Product image with correct URL
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: imageUrl.isNotEmpty
-                                      ? Image.network(
-                                          imageUrl,
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Container(
-                                              width: 50,
-                                              height: 50,
-                                              color: Colors.grey[300],
-                                              child: const Icon(Icons.image_not_supported),
-                                            );
-                                          },
-                                        )
-                                      : Container(
-                                          width: 50,
-                                          height: 50,
-                                          color: Colors.grey[300],
-                                          child: const Icon(Icons.image_not_supported),
-                                        ),
+                    child:
+                        items.isEmpty
+                            ? const Center(child: Text('Keranjang kosong'))
+                            : ListView.builder(
+                              itemCount: items.length,
+                              itemBuilder: (ctx, i) {
+                                final item = items[i];
+                                final productId = cart.items.keys.elementAt(i);
+                                final imageUrl = productImages[productId] ?? '';
+
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFEFEF),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  const SizedBox(width: 10),
-                                  
-                                  // Product details
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.title,
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(currencyFormatter.format(item.price)),
-                                      ],
-                                    ),
-                                  ),
-                                  
-                                  // Quantity controls
-                                  Row(
+                                  child: Row(
                                     children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.remove),
-                                        onPressed: () {
-                                          if (item.quantity > 1) {
-                                            // Use decreaseQuantity method
-                                            cart.decreaseQuantity(productId);
-                                          } else {
-                                            cart.removeItem(productId);
-                                          }
-                                        },
+                                      // Product image with correct URL
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child:
+                                            imageUrl.isNotEmpty
+                                                ? Image.network(
+                                                  imageUrl,
+                                                  width: 50,
+                                                  height: 50,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) {
+                                                    return Container(
+                                                      width: 50,
+                                                      height: 50,
+                                                      color: Colors.grey[300],
+                                                      child: const Icon(
+                                                        Icons
+                                                            .image_not_supported,
+                                                      ),
+                                                    );
+                                                  },
+                                                )
+                                                : Container(
+                                                  width: 50,
+                                                  height: 50,
+                                                  color: Colors.grey[300],
+                                                  child: const Icon(
+                                                    Icons.image_not_supported,
+                                                  ),
+                                                ),
                                       ),
-                                      Text('${item.quantity}'),
-                                      IconButton(
-                                        icon: const Icon(Icons.add),
-                                        onPressed: () {
-                                          // Call addItem with productId
-                                          cart.addItem(
-                                            productId,
-                                            item.title,
-                                            item.price,
-                                            1
-                                          );
-                                        },
+                                      const SizedBox(width: 10),
+
+                                      // Product details
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.title,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              currencyFormatter.format(
+                                                item.price,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Quantity controls
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.remove),
+                                            onPressed: () {
+                                              if (item.quantity > 1) {
+                                                // Use decreaseQuantity method
+                                                cart.decreaseQuantity(
+                                                  productId,
+                                                );
+                                              } else {
+                                                cart.removeItem(productId);
+                                              }
+                                            },
+                                          ),
+                                          Text('${item.quantity}'),
+                                          IconButton(
+                                            icon: const Icon(Icons.add),
+                                            onPressed: () {
+                                              // Call addItem with productId
+                                              cart.addItem(
+                                                productId,
+                                                item.title,
+                                                item.price,
+                                                1,
+                                              );
+                                            },
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                                );
+                              },
+                            ),
                   ),
 
                   // Coupon section
@@ -286,7 +312,10 @@ class _CartPageState extends State<CartPage> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -298,9 +327,15 @@ class _CartPageState extends State<CartPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
-                        child: const Text('Gunakan', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'Gunakan',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -309,7 +344,10 @@ class _CartPageState extends State<CartPage> {
                   const SizedBox(height: 20),
                   buildPriceRow("Sub total", subtotal),
                   if (_discount > 0)
-                    buildPriceRow("Diskon (${(_discount * 100).toInt()}%)", -discountAmount),
+                    buildPriceRow(
+                      "Diskon (${(_discount * 100).toInt()}%)",
+                      -discountAmount,
+                    ),
                   buildPriceRow("Pengantaran", deliveryFee),
                   const Divider(),
                   buildPriceRow("Total", total, isBold: true),
@@ -319,18 +357,22 @@ class _CartPageState extends State<CartPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: items.isEmpty ? null : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DataPembeliPage(
-                              totalPayment: total,
-                              items: cart.items.values.toList(),
-                              isDelivery: isDelivery,
-                            ),
-                          ),
-                        );
-                      },
+                      onPressed:
+                          items.isEmpty
+                              ? null
+                              : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => DataPembeliPage(
+                                          totalPayment: total,
+                                          items: cart.items.values.toList(),
+                                          isDelivery: isDelivery,
+                                        ),
+                                  ),
+                                );
+                              },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0D1B2A),
                         disabledBackgroundColor: Colors.grey[400],
@@ -350,10 +392,7 @@ class _CartPageState extends State<CartPage> {
             ),
           ),
           // Custom navigation bar
-          CustomNavBar(
-            scaffoldKey: _scaffoldKey,
-            currentRoute: '/cart',
-          ),
+          CustomNavBar(scaffoldKey: _scaffoldKey, currentRoute: '/cart'),
         ],
       ),
     );

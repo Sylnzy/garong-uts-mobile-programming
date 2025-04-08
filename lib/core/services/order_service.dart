@@ -4,7 +4,7 @@ import '/providers/cart_provider.dart';
 class OrderService {
   // Local storage of orders for demo purposes
   static final List<Map<String, dynamic>> _orders = [];
-  
+
   static Future<void> saveOrder({
     required String orderId,
     required int amount,
@@ -20,19 +20,23 @@ class OrderService {
         'date': DateTime.now().millisecondsSinceEpoch,
         'status': 'completed',
         'buyerData': buyerData,
-        'items': items.map((item) => {
-          'id': item.id,
-          'title': item.title,
-          'price': item.price,
-          'quantity': item.quantity,
-        }).toList(),
+        'items':
+            items
+                .map(
+                  (item) => {
+                    'id': item.id,
+                    'title': item.title,
+                    'price': item.price,
+                    'quantity': item.quantity,
+                  },
+                )
+                .toList(),
       };
-      
+
       // Add to local storage
       _orders.add(orderData);
-      
-      debugPrint('Order saved: $orderId');
-      return;
+
+      debugPrint('Order saved successfully: $orderId');
     } catch (e) {
       debugPrint('Error saving order: $e');
       throw Exception('Gagal menyimpan pesanan: $e');

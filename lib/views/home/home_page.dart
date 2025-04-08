@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '/views/widgets/custom_navbar.dart';
 import '/views/widgets/custom_drawer.dart';
 import '/core/services/firebase_service.dart';
+import '/views/widgets/feature_guide.dart';
+import '/core/services/onboarding_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -38,12 +40,18 @@ class _HomePageState extends State<HomePage> {
     {"name": "Sembako", "icon": Icons.shopping_basket},
     {"name": "Minuman", "icon": Icons.local_drink},
     {"name": "Makanan", "icon": Icons.fastfood},
-    {"name": "Lainnya", "icon": Icons.category},
   ];
 
   final PageController _bannerController = PageController();
   int _currentBannerIndex = 0;
   Timer? _bannerTimer;
+
+  // Add these keys for feature targeting
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _categoriesKey = GlobalKey();
+  final GlobalKey _bannerKey = GlobalKey();
+  final GlobalKey _productsKey = GlobalKey();
+  final GlobalKey _navbarKey = GlobalKey();
 
   @override
   void initState() {
@@ -51,6 +59,42 @@ class _HomePageState extends State<HomePage> {
     productsStream = FirebaseService.instance.getProductsStream();
     _startAutoSlide();
     debugPrint('Stream initialized in HomePage');
+
+    // Initialize onboarding guide with a slight delay
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initOnboardingGuide();
+    });
+  }
+
+  Future<void> _initOnboardingGuide() async {
+    final bool isNewUser = await OnboardingService.hasSeenOnboarding() == false;
+    if (isNewUser) {
+      final guide = FeatureGuide(
+        context: context,
+        keys: [
+          _searchKey,
+          _categoriesKey,
+          _bannerKey,
+          _productsKey,
+          _navbarKey,
+        ],
+        titles: [
+          'Pencarian Produk',
+          'Kategori Produk',
+          'Promo & Informasi',
+          'Katalog Produk',
+          'Navigasi Utama',
+        ],
+        descriptions: [
+          'Cari produk yang kamu inginkan dengan mudah di sini',
+          'Pilih kategori untuk mencari produk sesuai kebutuhan',
+          'Dapatkan informasi terbaru tentang promo dan penawaran menarik',
+          'Lihat semua produk tersedia dari warung kami',
+          'Akses seluruh fitur aplikasi Warung Garong dari sini',
+        ],
+      );
+      guide.showGuide();
+    }
   }
 
   @override
@@ -79,17 +123,17 @@ class _HomePageState extends State<HomePage> {
       {
         "title": "Warung Favorit di Genggamanmu !",
         "desc": "Beli kebutuhan sehari-hari tanpa ribet, langsung dari HP-mu.",
-        "color": "#778DA9",
+        "image": "assets/images/grocery.png", // Gambar lokal
       },
       {
         "title": "Gratis Ongkir",
         "desc": "Gunakan kode GRATONG dan dapatkan gratis ongkir!",
-        "color": "#415A77",
+        "image": "assets/images/gratong.png", // Gambar lokal
       },
       {
         "title": "Voucher Belanja",
         "desc": "Gunakan kode WARUNGHEMAT untuk potongan 10%",
-        "color": "#1B263B",
+        "image": "assets/images/diskon.png", // Gambar lokal
       },
     ];
   }
@@ -142,6 +186,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       drawer: CustomDrawer(currentRoute: '/', onLogout: _logout),
@@ -164,6 +209,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       // Search Bar
                       Container(
+                        key: _searchKey, // Add key for targeting
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0E1DD),
                           borderRadius: BorderRadius.circular(10),
@@ -186,6 +232,7 @@ class _HomePageState extends State<HomePage> {
 
                       // Banner Carousel
                       SizedBox(
+                        key: _bannerKey, // Add key for targeting
                         height: 150,
                         child: PageView.builder(
                           controller: _bannerController,
@@ -200,11 +247,9 @@ class _HomePageState extends State<HomePage> {
                             return Container(
                               margin: const EdgeInsets.symmetric(horizontal: 4),
                               decoration: BoxDecoration(
-                                color: Color(
-                                  int.parse(
-                                    banner["color"]!.replaceAll('#', '0xFF'),
-                                  ),
-                                ),
+                                color: const Color(
+                                  0xFF778DA9,
+                                ), // Warna latar belakang default
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Row(
@@ -241,10 +286,16 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   Expanded(
                                     child: Center(
-                                      child: Icon(
-                                        Icons.shopping_bag_outlined,
-                                        size: 80,
-                                        color: Colors.white.withOpacity(0.7),
+                                      child: Image.asset(
+                                        banner["image"]!, // Gunakan path gambar dari data
+                                        fit: BoxFit.contain,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                  Icons.broken_image,
+                                                  size: 80,
+                                                  color: Colors.white,
+                                                ),
                                       ),
                                     ),
                                   ),
@@ -287,13 +338,13 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       // Category title
                       Row(
+                        key: _categoriesKey, // Add key for targeting
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Kategori', style: AppTextStyle.heading),
-                          Text('View All', style: AppTextStyle.link),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 1),
 
                       // Category grid
                       GridView.builder(
@@ -359,7 +410,12 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 20),
 
                       // Products section
-                      Text('Rekomendasi', style: AppTextStyle.heading),
+                      Row(
+                        key: _productsKey, // Add key for targeting
+                        children: [
+                          Text('Rekomendasi', style: AppTextStyle.heading),
+                        ],
+                      ),
                       const SizedBox(height: 10),
 
                       // Products grid with search and category filtering
@@ -503,7 +559,11 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          CustomNavBar(scaffoldKey: _scaffoldKey, currentRoute: '/'),
+          CustomNavBar(
+            key: _navbarKey, // Add key for targeting
+            scaffoldKey: _scaffoldKey,
+            currentRoute: '/',
+          ),
         ],
       ),
     );

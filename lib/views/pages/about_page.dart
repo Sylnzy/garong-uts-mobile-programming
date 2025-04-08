@@ -22,7 +22,7 @@ class AboutPage extends StatelessWidget {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back,color: Colors.white),
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/');
           },
@@ -204,7 +204,7 @@ class AboutPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "NPM: $id",
+                  "NIM: $id",
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],

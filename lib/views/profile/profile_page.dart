@@ -13,6 +13,24 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Add a method to refresh profile data
+  void _refreshProfile() {
+    setState(() {
+      // This will trigger a rebuild with the latest user data
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for changes to the current user
+    FirebaseAuth.instance.userChanges().listen((User? user) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
   void _logout() async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -34,152 +52,182 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: const Color(0xFF0F1C2E),
       appBar: AppBar(
-        title: const Text('Profil'),
-        centerTitle: true,
-        backgroundColor: Colors.orange,
-        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text("Profile", style: TextStyle(color: Colors.black)),
+        leading: IconButton(
+          icon: const Icon(Icons.person_2_outlined, color: Colors.black),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
       ),
       drawer: CustomDrawer(currentRoute: '/profile', onLogout: _logout),
       body: Stack(
         children: [
           SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: NetworkImage(
-                            user?.photoURL ?? 'https://via.placeholder.com/150',
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const SizedBox(height: 24),
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading: const Icon(
-                              Icons.person,
-                              color: Colors.orange,
-                            ),
-                            title: const Text('Nama'),
-                            subtitle: Text(
-                              user?.displayName ?? 'Nama Pengguna',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            leading: const Icon(
-                              Icons.email,
-                              color: Colors.orange,
-                            ),
-                            title: const Text('Email'),
-                            subtitle: Text(
-                              user?.email ?? 'email@example.com',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ],
+                  child: Column(
+                    children: [
+                      // Profile picture
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage:
+                            user?.photoURL != null
+                                ? NetworkImage(user!.photoURL!)
+                                : null,
+                        child:
+                            user?.photoURL == null
+                                ? const Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: Colors.grey,
+                                )
+                                : null,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/edit-profile');
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit Profil'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
+                      const SizedBox(height: 16),
+
+                      // Name field
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Nama",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        width: double.infinity,
+                        child: Text(
+                          user?.displayName ?? 'Nama Pengguna',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: const Text('Konfirmasi Logout'),
-                                content: const Text(
-                                  'Apakah Anda yakin ingin keluar?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Batal'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      _logout();
-                                    },
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Colors.red,
+
+                      const SizedBox(height: 16),
+
+                      // Email field
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Email",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        width: double.infinity,
+                        child: Text(
+                          user?.email ?? 'email@example.com',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Edit Profile button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          label: const Text("Edit Profile"),
+                          onPressed: () async {
+                            final result = await Navigator.pushNamed(
+                              context,
+                              '/edit-profile',
+                            );
+                            if (result == true) {
+                              _refreshProfile();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F1C2E),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Logout button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          label: const Text("Logout"),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder:
+                                  (context) => AlertDialog(
+                                    title: const Text('Konfirmasi Logout'),
+                                    content: const Text(
+                                      'Apakah Anda yakin ingin keluar?',
                                     ),
-                                    child: const Text('Logout'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Batal'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          _logout();
+                                        },
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.red,
+                                        ),
+                                        child: const Text('Logout'),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                        );
-                      },
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Logout'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F1C2E),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 100), // Space for navbar
-                ],
-              ),
+                ),
+                const SizedBox(height: 100), // Space for navbar
+              ],
             ),
           ),
           CustomNavBar(scaffoldKey: _scaffoldKey, currentRoute: '/profile'),

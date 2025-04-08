@@ -25,7 +25,8 @@ class HalamanPembayaran extends StatefulWidget {
 enum PaymentMethod { qris, bca, bni, mandiri }
 
 class _HalamanPembayaranState extends State<HalamanPembayaran> {
-  bool isLoading = false; // Changed from true to false so we start at method selection
+  bool isLoading =
+      false; // Changed from true to false so we start at method selection
   bool isError = false;
   String errorMessage = '';
   String? qrCodeUrl;
@@ -34,36 +35,38 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
   Timer? _statusCheckTimer;
   int _secondsRemaining = 300; // 5 minutes countdown
   Timer? _countdownTimer;
-  PaymentMethod? _selectedPaymentMethod; // Changed to nullable to indicate no selection
-  bool _paymentMethodSelected = false; // New flag to track if method is selected
-  
+  PaymentMethod?
+  _selectedPaymentMethod; // Changed to nullable to indicate no selection
+  bool _paymentMethodSelected =
+      false; // New flag to track if method is selected
+
   @override
   void initState() {
     super.initState();
     // Don't generate payment yet - wait for method selection
     // Don't start countdown yet
-    
+
     // Create order ID right away, though
     orderId = 'ORDER-${DateTime.now().millisecondsSinceEpoch}';
   }
-  
+
   // Select payment method and begin payment generation
   void _selectPaymentMethod(PaymentMethod method) {
     setState(() {
       _selectedPaymentMethod = method;
       _paymentMethodSelected = true;
     });
-    
+
     _generatePayment();
     _startCountdown();
     _startPaymentStatusCheck();
   }
-  
+
   // Back to method selection
   void _backToMethodSelection() {
     _statusCheckTimer?.cancel();
     _countdownTimer?.cancel();
-    
+
     setState(() {
       _paymentMethodSelected = false;
       _selectedPaymentMethod = null;
@@ -71,7 +74,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       isError = false;
     });
   }
-  
+
   void _startCountdown() {
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -135,16 +138,17 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
             );
             qrCodeUrl = qrAction['url'];
           }
-          
+
           isLoading = false;
         });
       } catch (e) {
         // Use a logging framework instead of print in production
         debugPrint("Error calling Midtrans API: $e");
-        
+
         // Fallback to demo QR code for testing
         setState(() {
-          qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Payment-$widget.totalPayment-$orderId";
+          qrCodeUrl =
+              "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Payment-${widget.totalPayment}-$orderId";
           isLoading = false;
         });
       }
@@ -198,7 +202,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       } catch (e) {
         // Use a logging framework instead of print in production
         debugPrint("Error calling Midtrans API: $e");
-        
+
         // Fallback to demo data for testing
         setState(() {
           // Generate random VA number based on bank and orderId for testing
@@ -216,9 +220,11 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
             default:
               randomVA = '1234567890';
           }
-          
+
           paymentData = {
-            'va_numbers': [{'va_number': randomVA}],
+            'va_numbers': [
+              {'va_number': randomVA},
+            ],
             'bill_key': '${bankCode}_${orderId!.hashCode.abs()}',
           };
           isLoading = false;
@@ -246,7 +252,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       // if (_secondsRemaining == 290) { // After ~10 seconds of starting the payment
       //   _statusCheckTimer?.cancel();
       //   _countdownTimer?.cancel();
-        
+
       //   // Navigate to success page
       //   Navigator.pushReplacement(
       //     context,
@@ -259,29 +265,31 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       //     ),
       //   );
       // }
-      
+
       // The real Midtrans implementation would be:
-      
-      final statusResponse = await MidtransService.checkTransactionStatus(orderId!);
-      
-      if (statusResponse['transaction_status'] == 'settlement' || 
+
+      final statusResponse = await MidtransService.checkTransactionStatus(
+        orderId!,
+      );
+
+      if (statusResponse['transaction_status'] == 'settlement' ||
           statusResponse['transaction_status'] == 'capture') {
         _statusCheckTimer?.cancel();
         _countdownTimer?.cancel();
-        
+
         // Navigate to success page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => PaymentSuccessPage(
-              orderId: orderId!,
-              amount: widget.totalPayment,
-              buyerData: widget.buyerData,
-            ),
+            builder:
+                (context) => PaymentSuccessPage(
+                  orderId: orderId!,
+                  amount: widget.totalPayment,
+                  buyerData: widget.buyerData,
+                ),
           ),
         );
       }
-      
     } catch (e) {
       debugPrint('Error checking status: $e');
     }
@@ -426,26 +434,31 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
   Widget _buildVirtualAccountPayment() {
     String bankName = '';
     String vaNumber = '';
-    
+    String? logoAsset;
+
+    // Tentukan logo bank berdasarkan metode pembayaran
     switch (_selectedPaymentMethod) {
       case PaymentMethod.bca:
         bankName = 'BCA';
+        logoAsset = 'assets/images/bca_logo.png';
         break;
       case PaymentMethod.bni:
         bankName = 'BNI';
+        logoAsset = 'assets/images/bni_logo.png';
         break;
       case PaymentMethod.mandiri:
         bankName = 'Mandiri';
+        logoAsset = 'assets/images/mandiri_logo.png';
         break;
       default:
         bankName = '';
     }
-    
+
     // Extract VA number from paymentData
     if (paymentData != null) {
       if (_selectedPaymentMethod != PaymentMethod.mandiri) {
         // For BCA and BNI
-        if (paymentData!['va_numbers'] != null && 
+        if (paymentData!['va_numbers'] != null &&
             (paymentData!['va_numbers'] as List).isNotEmpty) {
           vaNumber = paymentData!['va_numbers'][0]['va_number'] ?? '';
         }
@@ -472,10 +485,28 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       ),
       child: Column(
         children: [
-          Text(
-            'Virtual Account $bankName',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (logoAsset != null)
+                Image.asset(
+                  logoAsset,
+                  width: 40,
+                  height: 40,
+                  errorBuilder:
+                      (context, error, stackTrace) =>
+                          const Icon(Icons.account_balance, size: 40),
+                ),
+              const SizedBox(width: 8),
+              Text(
+                'Virtual Account $bankName',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           Text(
@@ -552,17 +583,16 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
         decoration: BoxDecoration(
           color: Colors.blue.withAlpha(26), // withOpacity(0.1) replacement
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blue.withAlpha(76)), // withOpacity(0.3) replacement
+          border: Border.all(
+            color: Colors.blue.withAlpha(76),
+          ), // withOpacity(0.3) replacement
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text(
               'Cara Melakukan Pembayaran QRIS:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 8),
             Text('1. Buka aplikasi e-wallet (GoPay, OVO, DANA, dll)'),
@@ -588,23 +618,22 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
         default:
           bankName = '';
       }
-      
+
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.blue.withAlpha(26), // withOpacity(0.1) replacement
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blue.withAlpha(76)), // withOpacity(0.3) replacement
+          border: Border.all(
+            color: Colors.blue.withAlpha(76),
+          ), // withOpacity(0.3) replacement
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Cara Melakukan Pembayaran Virtual Account $bankName:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             const Text('1. Login ke Mobile Banking atau Internet Banking'),
@@ -626,11 +655,13 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
         backgroundColor: const Color(0xFF0D1B2A),
         foregroundColor: Colors.white,
         // Add back button if payment method is selected
-        leading: _paymentMethodSelected ? 
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _backToMethodSelection,
-          ) : null,
+        leading:
+            _paymentMethodSelected
+                ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _backToMethodSelection,
+                )
+                : null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -638,8 +669,8 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Total yang harus dibayar:', 
-              style: TextStyle(fontSize: 16)
+              'Total yang harus dibayar:',
+              style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
@@ -664,7 +695,11 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
               Center(
                 child: Column(
                   children: [
-                    const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 10),
                     Text(
                       'Error: $errorMessage',
@@ -679,7 +714,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('Coba Lagi'),
-                    )
+                    ),
                   ],
                 ),
               )
@@ -691,7 +726,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
                       _selectedPaymentMethod == PaymentMethod.qris
                           ? _buildQRISPayment()
                           : _buildVirtualAccountPayment(),
-                          
+
                       const SizedBox(height: 20),
                       const Text(
                         'Pembayaran akan otomatis terverifikasi',
@@ -712,11 +747,12 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PaymentSuccessPage(
-                                orderId: orderId ?? 'test-order',
-                                amount: widget.totalPayment,
-                                buyerData: widget.buyerData,
-                              ),
+                              builder:
+                                  (context) => PaymentSuccessPage(
+                                    orderId: orderId ?? 'test-order',
+                                    amount: widget.totalPayment,
+                                    buyerData: widget.buyerData,
+                                  ),
                             ),
                           );
                         },
@@ -738,7 +774,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
       ),
     );
   }
-  
+
   // Payment method selection widgets
   Widget _buildPaymentMethodSelection() {
     return Expanded(
@@ -750,65 +786,69 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           const SizedBox(height: 16),
-          
+
           // QRIS Payment Option
           _buildPaymentOption(
             title: 'QRIS',
             subtitle: 'GoPay, OVO, DANA, LinkAja, dll',
             icon: Icons.qr_code,
+            logoAsset: 'assets/images/qris_logo.png', // Logo QRIS
             onTap: () => _selectPaymentMethod(PaymentMethod.qris),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Bank Transfer Options
           const Text(
             'Transfer Bank:',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          
+
           _buildPaymentOption(
             title: 'BCA Virtual Account',
             subtitle: 'Bayar dari m-BCA atau ATM BCA',
             icon: Icons.account_balance,
+            logoAsset: 'assets/images/bca_logo.png', // Logo BCA
             onTap: () => _selectPaymentMethod(PaymentMethod.bca),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           _buildPaymentOption(
             title: 'BNI Virtual Account',
             subtitle: 'Bayar dari m-Banking BNI atau ATM BNI',
             icon: Icons.account_balance,
+            logoAsset: 'assets/images/bni_logo.png', // Logo BNI
             onTap: () => _selectPaymentMethod(PaymentMethod.bni),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           _buildPaymentOption(
             title: 'Mandiri Virtual Account',
             subtitle: 'Bayar dari m-Banking Mandiri atau ATM Mandiri',
             icon: Icons.account_balance,
+            logoAsset: 'assets/images/mandiri_logo.png', // Logo Mandiri
             onTap: () => _selectPaymentMethod(PaymentMethod.mandiri),
           ),
         ],
       ),
     );
   }
-  
+
   // Helper widget for a payment option
   Widget _buildPaymentOption({
     required String title,
     required String subtitle,
-    required IconData icon,
+    required IconData
+    icon, // Parameter ini tetap ada untuk backward compatibility
+    String? logoAsset, // Parameter baru untuk path gambar logo
     required VoidCallback onTap,
   }) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -816,7 +856,19 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icon, size: 36, color: const Color(0xFF0D1B2A)),
+              // Gunakan logo jika ada, jika tidak gunakan icon
+              if (logoAsset != null)
+                Image.asset(
+                  logoAsset,
+                  width: 36,
+                  height: 36,
+                  errorBuilder:
+                      (context, error, stackTrace) =>
+                          Icon(icon, size: 36, color: const Color(0xFF0D1B2A)),
+                )
+              else
+                Icon(icon, size: 36, color: const Color(0xFF0D1B2A)),
+
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -831,10 +883,7 @@ class _HalamanPembayaranState extends State<HalamanPembayaran> {
                     ),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                   ],
                 ),

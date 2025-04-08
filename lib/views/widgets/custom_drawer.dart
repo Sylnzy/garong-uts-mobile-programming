@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String currentRoute;
@@ -12,25 +13,42 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get current user data
+    final user = FirebaseAuth.instance.currentUser;
+
     return Drawer(
       child: Column(
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: const Color(0xFF0D1B2A)),
+            decoration: const BoxDecoration(color: Color(0xFF0D1B2A)),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 35, color: const Color(0xFF0D1B2A)),
+                  backgroundImage:
+                      user?.photoURL != null
+                          ? NetworkImage(user!.photoURL!)
+                          : null,
+                  child:
+                      user?.photoURL == null
+                          ? const Icon(
+                            Icons.person,
+                            size: 35,
+                            color: Color(0xFF0D1B2A),
+                          )
+                          : null,
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  'Hello, Kelompok 9',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    'Hello, ${user?.displayName ?? 'User'}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -58,12 +76,7 @@ class CustomDrawer extends StatelessWidget {
                   icon: Icons.history,
                   route: '/history',
                 ),
-                _buildDrawerItem(
-                  context: context,
-                  title: 'Lokasi',
-                  icon: Icons.location_on,
-                  route: '/lokasi',
-                ),
+                
                 _buildDrawerItem(
                   context: context,
                   title: 'About',
@@ -75,6 +88,12 @@ class CustomDrawer extends StatelessWidget {
                   title: 'Setting',
                   icon: Icons.settings,
                   route: '/setting',
+                ),
+                _buildDrawerItem(
+                  context: context,
+                  title: 'Profile',
+                  icon: Icons.person,
+                  route: '/profile',
                 ),
               ],
             ),
