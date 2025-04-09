@@ -128,17 +128,17 @@ class AboutPage extends StatelessWidget {
                 _buildMemberCard(
                   name: "Maulana Hasanudin",
                   id: "2307411006",
-                  imagePath: "assets/images/splash.png",
+                  imagePath: "assets/images/maul.jpg",
                 ),
                 _buildMemberCard(
                   name: "Naila Syakirotul Rizkiyah",
                   id: "2307411011",
-                  imagePath: "assets/images/splash.png",
+                  imagePath: "assets/images/naila.jpg",
                 ),
                 _buildMemberCard(
                   name: "Rizky Amelia Putri",
                   id: "2307411015",
-                  imagePath: "assets/images/splash.png",
+                  imagePath: "assets/images/amel.jpg",
                 ),
 
                 const SizedBox(height: 100), // Space for bottom navigation

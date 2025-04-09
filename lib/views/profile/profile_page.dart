@@ -244,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           label: const Text(
                             "Logout",
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16, color: Color(0xFF0F1C2E)),
                           ),
                           onPressed: () {
                             showDialog(
