@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uts_garong_test/providers/cart_provider.dart';
 import '/data/models/product_model.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final ProductModel product;
@@ -55,7 +56,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Color(0xFFE0E1DD),
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                 ),
                 padding: EdgeInsets.all(20),
@@ -74,7 +75,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        "Rp ${product.price.toStringAsFixed(0)}",
+                        "Rp ${NumberFormat('#,###').format(product.price)}",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

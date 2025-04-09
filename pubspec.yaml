@@ -33,6 +33,7 @@ dependencies:
   logger: ^2.5.0
   google_sign_in: ^6.3.0
   
+  
 
 dev_dependencies:
   flutter_test:
@@ -86,4 +87,7 @@ flutter:
     - assets/images/map_background.jpg
     - assets/images/gratong.png
     - assets/images/diskon.png
+    - assets/images/maul.jpg
+    - assets/images/amel.jpg
+    - assets/images/naila.jpg
 
