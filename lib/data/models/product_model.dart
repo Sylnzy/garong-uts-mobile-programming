@@ -83,10 +83,19 @@ class ProductModel {
     final ref = FirebaseDatabase.instance.ref().child('products').child(id);
 
     final snapshot = await ref.get();
-    final currentStock = snapshot.child('stock').value as int? ?? 0;
+    // Perbaiki pengecekan tipe data untuk nilai stock
+    int currentStock = 0;
+    if (snapshot.exists) {
+      var stockValue = snapshot.child('stock').value;
+      if (stockValue is int) {
+        currentStock = stockValue;
+      } else if (stockValue != null) {
+        currentStock = int.tryParse(stockValue.toString()) ?? 0;
+      }
+    }
 
     if (currentStock < quantity) {
-      throw Exception('Insufficient stock');
+      throw Exception('Stok tidak mencukupi');
     }
 
     await ref.update({'stock': currentStock - quantity});
