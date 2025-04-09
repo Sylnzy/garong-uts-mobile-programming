@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '/views/widgets/custom_navbar.dart';
 import '/views/widgets/custom_drawer.dart';
+import '/core/utils/page_transition.dart';
+import '/views/profile/edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -54,11 +56,14 @@ class _ProfilePageState extends State<ProfilePage> {
       key: _scaffoldKey,
       backgroundColor: const Color(0xFF0F1C2E),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF0F1C2E),
         elevation: 0,
-        title: const Text("Profile", style: TextStyle(color: Colors.black)),
+        title: const Text(
+          "Profile",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.person_2_outlined, color: Colors.black),
+          icon: const Icon(Icons.person_2_outlined, color: Colors.white),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
       ),
@@ -69,99 +74,148 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
+                // Profile Header with Avatar
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 24,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1A2C42), Color(0xFF0F1C2E)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
-                      // Profile picture
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage:
-                            user?.photoURL != null
-                                ? NetworkImage(user!.photoURL!)
-                                : null,
-                        child:
-                            user?.photoURL == null
-                                ? const Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: Colors.grey,
-                                )
-                                : null,
+                      // Profile picture with outline
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage:
+                              user?.photoURL != null
+                                  ? NetworkImage(user!.photoURL!)
+                                  : null,
+                          child:
+                              user?.photoURL == null
+                                  ? const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Color(0xFF0F1C2E),
+                                  )
+                                  : null,
+                        ),
                       ),
                       const SizedBox(height: 16),
 
-                      // Name field
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Nama",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                      // User name with larger font
+                      Text(
+                        user?.displayName ?? 'Nama Pengguna',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        width: double.infinity,
-                        child: Text(
-                          user?.displayName ?? 'Nama Pengguna',
-                          style: const TextStyle(fontSize: 16),
+                      // User email
+                      Text(
+                        user?.email ?? 'email@example.com',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.8),
                         ),
                       ),
+                    ],
+                  ),
+                ),
 
+                const SizedBox(height: 24),
+
+                // User Details Card
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Section header
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Personal Information",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F1C2E),
+                          ),
+                        ),
+                      ),
+                      const Divider(),
                       const SizedBox(height: 16),
 
-                      // Email field
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Email",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                      // Name field with icon
+                      _buildInfoItem(
+                        Icons.person,
+                        "Full Name",
+                        user?.displayName ?? 'Nama Pengguna',
                       ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        width: double.infinity,
-                        child: Text(
-                          user?.email ?? 'email@example.com',
-                          style: const TextStyle(fontSize: 16),
-                        ),
+                      const SizedBox(height: 16),
+
+                      // Email field with icon
+                      _buildInfoItem(
+                        Icons.email,
+                        "Email",
+                        user?.email ?? 'email@example.com',
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
-                      // Edit Profile button
+                      // Edit Profile button with gradient
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.edit, color: Colors.white),
-                          label: const Text("Edit Profile"),
+                          label: const Text(
+                            "Edit Profile",
+                            style: TextStyle(fontSize: 16),
+                          ),
                           onPressed: () async {
-                            final result = await Navigator.pushNamed(
+                            // Replace Navigator.pushNamed with custom transition
+                            final result = await Navigator.push(
                               context,
-                              '/edit-profile',
+                              SlidePageRoute(
+                                page: const EditProfilePage(),
+                                direction: SlideDirection.right,
+                              ),
                             );
+
                             if (result == true) {
                               _refreshProfile();
                             }
@@ -173,18 +227,25 @@ class _ProfilePageState extends State<ProfilePage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 3,
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 16),
 
-                      // Logout button
+                      // Logout button with different style
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.logout, color: Colors.white),
-                          label: const Text("Logout"),
+                        child: OutlinedButton.icon(
+                          icon: const Icon(
+                            Icons.logout,
+                            color: Color(0xFF0F1C2E),
+                          ),
+                          label: const Text(
+                            "Logout",
+                            style: TextStyle(fontSize: 16),
+                          ),
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -193,6 +254,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                     title: const Text('Konfirmasi Logout'),
                                     content: const Text(
                                       'Apakah Anda yakin ingin keluar?',
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
                                     actions: [
                                       TextButton(
@@ -213,9 +277,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                             );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F1C2E),
-                            foregroundColor: Colors.white,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                              color: Color(0xFF0F1C2E),
+                              width: 1.5,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -231,6 +297,46 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           CustomNavBar(scaffoldKey: _scaffoldKey, currentRoute: '/profile'),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to create info items
+  Widget _buildInfoItem(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF0F1C2E), size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

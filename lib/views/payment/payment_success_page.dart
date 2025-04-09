@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/providers/cart_provider.dart';
 import '/core/services/order_service.dart';
+import 'package:firebase_database/firebase_database.dart';
+import '/data/models/product_model.dart';
 
 class PaymentSuccessPage extends StatefulWidget {
   final String orderId;
@@ -32,13 +34,16 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
   Future<void> _saveOrderData() async {
     try {
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
-
+      // Menyimpan pesanan ke Firebase
       await OrderService.saveOrder(
         orderId: widget.orderId,
         amount: widget.amount,
         items: cartProvider.items.values.toList(),
         buyerData: widget.buyerData,
       );
+
+      // Mengurangi stock untuk setiap item dalam keranjang
+      await _decreaseProductsStock(cartProvider);
 
       setState(() {
         _isSaving = false;
@@ -50,6 +55,45 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
       });
       debugPrint('Error saving order: $e');
     }
+  }
+
+  // Tambahkan method baru untuk mengurangi stock
+  Future<void> _decreaseProductsStock(CartProvider cartProvider) async {
+    for (final productId in cartProvider.items.keys) {
+      final item = cartProvider.items[productId]!;
+      try {
+        // Ambil referensi database untuk mengakses model produk
+        final dbRef = FirebaseDatabase.instance
+            .ref()
+            .child('products')
+            .child(productId);
+        final snapshot = await dbRef.get();
+
+        // Pastikan produk ditemukan
+        if (snapshot.exists) {
+          final data = snapshot.value as Map<dynamic, dynamic>;
+          final productModel = ProductModel.fromRTDB(
+            Map<String, dynamic>.from(data),
+            productId,
+          );
+
+          // Gunakan method decreaseStock dari ProductModel
+          await productModel.decreaseStock(item.quantity);
+          debugPrint(
+            'Stock berkurang untuk produk ${item.title}, jumlah: ${item.quantity}',
+          );
+        } else {
+          debugPrint('Produk tidak ditemukan: $productId');
+        }
+      } catch (e) {
+        debugPrint('Error mengurangi stock: $e');
+        // Anda bisa memutuskan apakah ingin throw exception ini atau tidak
+        // throw e;
+      }
+    }
+
+    // Bersihkan keranjang setelah semua stock berhasil diperbarui
+    cartProvider.clearCart();
   }
 
   @override

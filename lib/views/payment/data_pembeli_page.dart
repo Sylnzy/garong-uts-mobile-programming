@@ -26,13 +26,17 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
   final alamatController = TextEditingController();
   final catatanController = TextEditingController();
 
+  // Alamat toko untuk self pickup
+  final String alamatToko =
+      "Jl. Raya Sukabumi No. 123, Kecamatan Cikole, Kota Sukabumi, Jawa Barat 43113";
+
   void _handlePesan() {
     if (_formKey.currentState!.validate()) {
       final buyerData = {
         'nama': namaController.text,
         'email': emailController.text,
         'hp': hpController.text,
-        'alamat': widget.isDelivery ? alamatController.text : '',
+        'alamat': widget.isDelivery ? alamatController.text : alamatToko,
         'catatan': catatanController.text,
         'isDelivery': widget.isDelivery,
       };
@@ -94,20 +98,6 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
               ),
               const SizedBox(height: 12),
 
-              if (widget.isDelivery)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTextField(
-                      label: 'Alamat',
-                      controller: alamatController,
-                      isRequired: true,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-
               // Tampilkan status pengiriman yang dipilih
               Container(
                 padding: const EdgeInsets.all(12),
@@ -132,6 +122,59 @@ class _DataPembeliPageState extends State<DataPembeliPage> {
                 ),
               ),
               const SizedBox(height: 12),
+
+              // Kondisional untuk alamat
+              if (widget.isDelivery) ...[
+                // Jika delivery, minta alamat pengiriman
+                _buildTextField(
+                  label: 'Alamat Pengiriman',
+                  controller: alamatController,
+                  isRequired: true,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+              ] else ...[
+                // Jika self pickup, tampilkan alamat toko
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Alamat Toko (untuk Self Pickup):',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey.shade100,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Toko Garong',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(alamatToko),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Jam Operasional: 08.00 - 21.00 WIB',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ],
 
               _buildTextField(
                 label: 'Catatan',
